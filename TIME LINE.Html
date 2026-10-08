@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eje Cronológico Clásico: Grecia y Roma (2º ESO) - I.E.S. Generalife</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --greek-blue: #0284c7;
+            --greek-light: #38bdf8;
+            --roman-red: #b91c1c;
+            --roman-light: #f87171;
+            --century-gold: #d97706;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: #38bdf8;
+        }
+
+        header h2 {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .btn-greece {
+            background-color: var(--greek-blue);
+            color: white;
+        }
+
+        .btn-greece:hover { background-color: #0369a1; }
+
+        .btn-rome {
+            background-color: var(--roman-red);
+            color: white;
+        }
+
+        .btn-rome:hover { background-color: #991b1b; }
+
+        .btn-reset {
+            background-color: #475569;
+            color: white;
+        }
+
+        .btn-reset:hover { background-color: #334155; }
+
+        /* Timeline Container */
+        .timeline-wrapper {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .timeline-grid {
+            min-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .section-label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Greek & Roman Block Rows */
+        .blocks-row {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 5px;
+            height: 80px;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        .blocks-row.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .stage-block {
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stage-block:hover {
+            transform: scale(1.02);
+            filter: brightness(1.2);
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        /* Greek Styles */
+        .greek-arc { grid-column: 1 / 4; background-color: #0369a1; }
+        .greek-clas { grid-column: 4 / 6; background-color: #0284c7; }
+        .greek-hel { grid-column: 6 / 9; background-color: #075985; }
+
+        /* Roman Styles */
+        .roman-mon { grid-column: 1 / 4; background-color: #991b1b; }
+        .roman-rep { grid-column: 4 / 9; background-color: #b91c1c; }
+        .roman-imp { grid-column: 9 / 14; background-color: #831843; }
+
+        /* Axis Styles */
+        .axis-section {
+            border-top: 2px solid #475569;
+            border-bottom: 2px solid #475569;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 6px;
+        }
+
+        .centuries-row {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .century-box {
+            background-color: #334155;
+            color: var(--century-gold);
+            padding: 6px 2px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            border: 1px solid var(--century-gold);
+        }
+
+        .years-row {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 5px;
+            position: relative;
+        }
+
+        .year-marker {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            position: relative;
+        }
+
+        .year-marker::before {
+            content: '▲';
+            display: block;
+            color: #94a3b8;
+            font-size: 0.6rem;
+            margin-bottom: 2px;
+        }
+
+        .year-marker.highlight {
+            color: #facc15;
+            font-weight: bold;
+        }
+
+        .year-marker.highlight::before {
+            color: #facc15;
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            min-height: 140px;
+        }
+
+        .detail-panel h3 {
+            color: #38bdf8;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .detail-card {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #38bdf8;
+        }
+
+        .detail-card ul {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .detail-content { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>I.E.S. GENERALIFE - Geografía e Historia 2º ESO</h1>
+        <h2>Eje Cronológico Comparativo: Antigua Grecia y Antigua Roma</h2>
+    </header>
+
+    <div class="controls">
+        <button class="btn-greece" onclick="toggleSection('greece')">🔵 Revelar / Ocultar Grecia (Arriba)</button>
+        <button class="btn-rome" onclick="toggleSection('rome')">🔴 Revelar / Ocultar Roma (Abajo)</button>
+        <button class="btn-reset" onclick="resetAll()">🔄 Reiniciar (Solo Línea del Tiempo)</button>
+    </div>
+
+    <div class="timeline-wrapper">
+        <div class="timeline-grid">
+            
+            <!-- BLOQUE GRECIA (ARRIBA) -->
+            <div id="greece-label" class="section-label" style="color: var(--greek-light); opacity: 0;">
+                <span>🏛️ ANTIGUA GRECIA</span> <small>(Haz clic en cada etapa para ver hechos y personajes)</small>
+            </div>
+            <div id="greece-row" class="blocks-row">
+                <div class="stage-block greek-arc" onclick="showDetail('greek-arc')">
+                    <strong>Época Arcaica</strong>
+                    <small>s. VIII - s. VI a.C.</small>
+                </div>
+                <div class="stage-block greek-clas" onclick="showDetail('greek-clas')">
+                    <strong>Época Clásica</strong>
+                    <small>s. V - s. IV a.C.</small>
+                </div>
+                <div class="stage-block greek-hel" onclick="showDetail('greek-hel')">
+                    <strong>Época Helenística</strong>
+                    <small>s. IV - s. I a.C.</small>
+                </div>
+            </div>
+
+            <!-- EJE CENTRAL: SIGLOS (CAJAS ANCHAS) Y AÑOS (PUNTOS) -->
+            <div class="axis-section">
+                <div class="section-label" style="color: var(--century-gold); justify-content: center; font-size:0.8rem;">
+                    NIVEL SUPERIOR: SIGLOS (NÚMEROS ROMANOS)
+                </div>
+                <div class="centuries-row">
+                    <div class="century-box">s. VIII a.C.</div>
+                    <div class="century-box">s. VII a.C.</div>
+                    <div class="century-box">s. VI a.C.</div>
+                    <div class="century-box">s. V a.C.</div>
+                    <div class="century-box">s. IV a.C.</div>
+                    <div class="century-box">s. III a.C.</div>
+                    <div class="century-box">s. II a.C.</div>
+                    <div class="century-box">s. I a.C.</div>
+                    <div class="century-box">s. I d.C.</div>
+                    <div class="century-box">s. II d.C.</div>
+                    <div class="century-box">s. III d.C.</div>
+                    <div class="century-box">s. IV d.C.</div>
+                    <div class="century-box">s. V d.C.</div>
+                </div>
+
+                <div class="section-label" style="color: #cbd5e1; justify-content: center; font-size:0.8rem; margin-top:5px;">
+                    NIVEL INFERIOR: AÑOS Y FECHAS CLAVE (PUNTOS EXACTOS)
+                </div>
+                <div class="years-row">
+                    <div class="year-marker highlight">753 a.C.<br><small>Fundación Roma</small></div>
+                    <div class="year-marker">600 a.C.<br><small>Polis</small></div>
+                    <div class="year-marker highlight">509 a.C.<br><small>Inicio República</small></div>
+                    <div class="year-marker highlight">500 a.C.<br><small>Democracia</small></div>
+                    <div class="year-marker highlight">334 a.C.<br><small>Al. Magno</small></div>
+                    <div class="year-marker highlight">218 a.C.<br><small>Llegada Hispania</small></div>
+                    <div class="year-marker">100 a.C.<br><small>Expansión</small></div>
+                    <div class="year-marker highlight">27 a.C.<br><small>Inicio Imperio</small></div>
+                    <div class="year-marker highlight">Año 0<br><small>Nac. Cristo</small></div>
+                    <div class="year-marker">117 d.C.<br><small>Máx. Expansión</small></div>
+                    <div class="year-marker">284 d.C.<br><small>Crisis Imper.</small></div>
+                    <div class="year-marker highlight">395 d.C.<br><small>División Imper.</small></div>
+                    <div class="year-marker highlight" style="color:#f87171;">476 d.C.<br><small><strong>¡Caída de Roma!</strong></small></div>
+                </div>
+            </div>
+
+            <!-- BLOQUE ROMA (ABAJO) -->
+            <div id="rome-row" class="blocks-row">
+                <div class="stage-block roman-mon" onclick="showDetail('roman-mon')">
+                    <strong>Monarquía Romana</strong>
+                    <small>753 a.C. - 509 a.C.</small>
+                </div>
+                <div class="stage-block roman-rep" onclick="showDetail('roman-rep')">
+                    <strong>República Romana</strong>
+                    <small>509 a.C. - 27 a.C.</small>
+                </div>
+                <div class="stage-block roman-imp" onclick="showDetail('roman-imp')">
+                    <strong>Imperio Romano</strong>
+                    <small>27 a.C. - 476 d.C.</small>
+                </div>
+            </div>
+            <div id="rome-label" class="section-label" style="color: var(--roman-light); opacity: 0;">
+                <span>🛡️ ANTIGUA ROMA</span> <small>(Haz clic en cada etapa para ver hechos y personajes)</small>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PANEL DE DETALLES E INFORMACIÓN -->
+    <div class="detail-panel" id="detail-panel">
+        <h3 id="detail-title">💡 Panel de Información General</h3>
+        <div class="detail-content" id="detail-body">
+            <div class="detail-card">
+                <strong>¿Cómo usar este mapa en clase?</strong>
+                <p>1. Utiliza los botones superiores para revelar u ocultar las franjas de Grecia y Roma.</p>
+                <p>2. Observa la diferencia central entre los <strong>Siglos (cajas en números romanos)</strong> y las <strong>Fechas exactas (puntos abajo)</strong>.</p>
+            </div>
+            <div class="detail-card">
+                <strong>Instrucciones:</strong>
+                <p>Haz clic en cualquiera de las cajas de etapas (arriba en azul o abajo en rojo) para ver aquí desglosados sus hechos decisivos y personajes principales.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const detailsData = {
+            'greek-arc': {
+                title: '🏛️ Grecia: Época Arcaica (s. VIII a.C. - s. VI a.C.)',
+                facts: ['Nacimiento de las **Polis** (ciudades-estado independientes como Atenas y Esparta).', 'Primeras colonizaciones griegas por el mar Mediterráneo.', 'Celebración de los primeros Juegos Olímpicos (776 a.C.).'],
+                figures: ['**Homero**: Poeta creador de la *Ilíada* y la *Odisea*.', '**Solón**: Legislador que inició las primeras reformas en Atenas.']
+            },
+            'greek-clas': {
+                title: '🏛️ Grecia: Época Clásica (s. V a.C. - s. IV a.C.)',
+                facts: ['Nacimiento y consolidación de la **Democracia** en Atenas.', 'Guerras Médicas (victoria griega contra los persas).', 'Guerra del Peloponeso (enfrentamiento entre Atenas y Esparta).'],
+                figures: ['**Pericles**: Gran dirigente político de Atenas durante su siglo de oro.', '**Sócrates y Platón**: Filósofos clave del pensamiento occidental.']
+            },
+            'greek-hel': {
+                title: '🏛️ Grecia: Época Helenística (s. IV a.C. - s. I a.C.)',
+                facts: ['Expansión de la cultura griega hacia Oriente Medio y Egipto.', 'Creación de la gran Biblioteca de Alejandría.', 'Grecia termina siendo conquistada e integrada por Roma.'],
+                figures: ['**Alejandro Magno**: Rey de Macedonia que conquistó el Imperio Persa.', '**Arquímedes**: Gran científico y matemático helenístico.']
+            },
+            'roman-mon': {
+                title: '🛡️ Roma: Monarquía (753 a.C. - 509 a.C.)',
+                facts: ['Fundación de la ciudad de Roma a orillas del río Tíber.', 'Gobierno de los 7 reyes tradicionales (latinos y etruscos).', 'Creación del Senado como órgano consultivo.'],
+                figures: ['**Rómulo**: Primer rey y fundador mítico de Roma.', '**Tarquinio el Soberbio**: Último rey de Roma, expulsado por su tiranía.']
+            },
+            'roman-rep': {
+                title: '🛡️ Roma: República (509 a.C. - 27 a.C.)',
+                facts: ['Expansión militar por el Mediterráneo (**Guerras Púnicas** contra Cartago).', 'Desembarco romano en la Península Ibérica (**218 a.C.** en Ampurias).', 'Crisis sociales y guerras civiles al final del periodo.'],
+                figures: ['**Julio César**: General victorioso que conquistó la Galia y fue nombrado dictador.', '**Aníbal Barca**: General cartaginés que puso en jaque a Roma.']
+            },
+            'roman-imp': {
+                title: '🛡️ Roma: Imperio Romano (27 a.C. - 476 d.C.)',
+                facts: ['Periodo de la ***Pax Romana*** y máxima expansión territorial.', 'División del Imperio por Teodosio (**395 d.C.**) en Occidente y Oriente.', '**476 d.C.**: Caída del Imperio Romano de Occidente $\\rightarrow$ **¡Inicio de la Edad Media!**'],
+                figures: ['**César Augusto**: Primer emperador de Roma.', '**Teodosio**: Dividió el Imperio y declaró el cristianismo religión oficial.']
+            }
+        };
+
+        function toggleSection(section) {
+            const row = document.getElementById(`${section}-row`);
+            const label = document.getElementById(`${section}-label`);
+            row.classList.toggle('visible');
+            label.style.opacity = row.classList.contains('visible') ? '1' : '0';
+        }
+
+        function resetAll() {
+            document.getElementById('greece-row').classList.remove('visible');
+            document.getElementById('greece-label').style.opacity = '0';
+            document.getElementById('rome-row').classList.remove('visible');
+            document.getElementById('rome-label').style.opacity = '0';
+            
+            document.getElementById('detail-title').innerText = '💡 Panel de Información General';
+            document.getElementById('detail-body').innerHTML = `
+                <div class="detail-card">
+                    <strong>¿Cómo usar este mapa en clase?</strong>
+                    <p>1. Utiliza los botones superiores para revelar u ocultar las franjas de Grecia y Roma.</p>
+                    <p>2. Observa la diferencia central entre los <strong>Siglos (cajas en números romanos)</strong> y las <strong>Fechas exactas (puntos abajo)</strong>.</p>
+                </div>
+                <div class="detail-card">
+                    <strong>Instrucciones:</strong>
+                    <p>Haz clic en cualquiera de las cajas de etapas (arriba en azul o abajo en rojo) para ver aquí desglosados sus hechos decisivos y personajes principales.</p>
+                </div>
+            `;
+        }
+
+        function showDetail(key) {
+            const data = detailsData[key];
+            if (!data) return;
+
+            document.getElementById('detail-title').innerText = data.title;
+            
+            let factsHTML = data.facts.map(f => `<li>${f.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('');
+            let figuresHTML = data.figures.map(f => `<li>${f.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('');
+
+            document.getElementById('detail-body').innerHTML = `
+                <div class="detail-card" style="border-left-color: #38bdf8;">
+                    <strong>📌 Hechos y Acontecimientos Clave:</strong>
+                    <ul>${factsHTML}</ul>
+                </div>
+                <div class="detail-card" style="border-left-color: #f87171;">
+                    <strong>👤 Personajes Destacados:</strong>
+                    <ul>${figuresHTML}</ul>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
